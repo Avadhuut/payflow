@@ -34,3 +34,15 @@ eureka:
 springdoc:
   api-docs:
     path: /api/notifications/v3/api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,prometheus"
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces

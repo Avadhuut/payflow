@@ -20,15 +20,12 @@ public class SagaEventConsumer {
     private static final Logger logger = LoggerFactory.getLogger(SagaEventConsumer.class);
 
     private final TransactionService transactionService;
-    private final PaymentEventProducer eventProducer;
     private final ObjectMapper objectMapper;
 
     public SagaEventConsumer(
             TransactionService transactionService,
-            PaymentEventProducer eventProducer,
             ObjectMapper objectMapper) {
         this.transactionService = transactionService;
-        this.eventProducer = eventProducer;
         this.objectMapper = objectMapper;
     }
 
@@ -67,12 +64,9 @@ public class SagaEventConsumer {
             TransactionResponse tx = transactionService.getTransaction(paymentId);
             UUID correlationId = tx.getCorrelationId();
 
-            logger.info("[CorrelationID: {}] Fraud check cleared. Transitioning transaction {} to COMPLETED",
+            logger.info("[CorrelationID: {}] Fraud check cleared. Completing transaction {}",
                     correlationId, paymentId);
-            transactionService.updateStatus(paymentId, TransactionStatus.COMPLETED);
-
-            // Publish final payment.completed event
-            eventProducer.publishPaymentCompleted(correlationId, paymentId, tx.getSenderAccountId(), tx.getReceiverAccountId(), tx.getAmount());
+            transactionService.completeTransaction(paymentId);
         } catch (Exception e) {
             logger.error("Failed to process fraud.cleared event", e);
         }

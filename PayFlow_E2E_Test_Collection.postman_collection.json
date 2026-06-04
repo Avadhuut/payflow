@@ -621,6 +621,132 @@
         "description": "Retrieves the top 100 most recent ledger entries logged in the system."
       },
       "response": []
+    },
+    {
+      "name": "9a. Gateway Actuator Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/actuator/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "actuator",
+            "health"
+          ]
+        },
+        "description": "Queries the API Gateway actuator health endpoint."
+      },
+      "response": []
+    },
+    {
+      "name": "9b. Gateway Prometheus Metrics",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/actuator/prometheus",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "actuator",
+            "prometheus"
+          ]
+        },
+        "description": "Queries the API Gateway prometheus metrics format."
+      },
+      "response": []
+    },
+    {
+      "name": "9c. Transaction Service Actuator Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8083/actuator/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "actuator",
+            "health"
+          ]
+        },
+        "description": "Queries the Transaction Service actuator health endpoint directly."
+      },
+      "response": []
+    },
+    {
+      "name": "9d. Transaction Service Prometheus Metrics",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8083/actuator/prometheus",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "actuator",
+            "prometheus"
+          ]
+        },
+        "description": "Queries the Transaction Service prometheus metrics format directly."
+      },
+      "response": []
+    },
+    {
+      "name": "9e. Auth Service Actuator Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8081/actuator/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "actuator",
+            "health"
+          ]
+        },
+        "description": "Queries the Auth Service actuator health endpoint directly."
+      },
+      "response": []
+    },
+    {
+      "name": "9f. Auth Service Prometheus Metrics",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8081/actuator/prometheus",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "actuator",
+            "prometheus"
+          ]
+        },
+        "description": "Queries the Auth Service prometheus metrics format directly."
+      },
+      "response": []
     }
   ]
 }

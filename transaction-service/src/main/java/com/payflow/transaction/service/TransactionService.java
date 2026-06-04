@@ -6,15 +6,19 @@ import com.payflow.transaction.dto.TransactionRequest;
 import com.payflow.transaction.dto.TransactionResponse;
 import com.payflow.transaction.entity.Transaction;
 import com.payflow.transaction.entity.TransactionStatus;
+import com.payflow.transaction.entity.OutboxEvent;
+import com.payflow.transaction.entity.OutboxStatus;
 import com.payflow.transaction.event.PaymentInitiatedEvent;
 import com.payflow.transaction.event.PaymentRollbackEvent;
-import com.payflow.transaction.messaging.PaymentEventProducer;
 import com.payflow.transaction.repository.TransactionRepository;
+import com.payflow.transaction.repository.OutboxEventRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,15 +30,18 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final AccountServiceClient accountServiceClient;
-    private final PaymentEventProducer eventProducer;
+    private final OutboxEventRepository outboxEventRepository;
+    private final ObjectMapper objectMapper;
 
     public TransactionService(
             TransactionRepository transactionRepository,
             AccountServiceClient accountServiceClient,
-            PaymentEventProducer eventProducer) {
+            OutboxEventRepository outboxEventRepository,
+            ObjectMapper objectMapper) {
         this.transactionRepository = transactionRepository;
         this.accountServiceClient = accountServiceClient;
-        this.eventProducer = eventProducer;
+        this.outboxEventRepository = outboxEventRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional
@@ -64,13 +71,27 @@ public class TransactionService {
                 .build();
         Transaction saved = transactionRepository.save(transaction);
 
-        // 3. Trigger asynchronous Saga flow by publishing to payment.initiated
+        // 3. Create OutboxEvent for asynchronous Saga flow (instead of direct Kafka publish)
         PaymentInitiatedEvent initiatedEvent = PaymentInitiatedEvent.builder()
                 .paymentId(saved.getId())
                 .accountId(saved.getSenderAccountId())
                 .amount(saved.getAmount())
                 .build();
-        eventProducer.publishPaymentInitiated(correlationId, initiatedEvent);
+        try {
+            String payload = objectMapper.writeValueAsString(initiatedEvent);
+            OutboxEvent outboxEvent = OutboxEvent.builder()
+                    .aggregateType("Transaction")
+                    .aggregateId(saved.getId())
+                    .eventType("payment.initiated")
+                    .payload(payload)
+                    .status(OutboxStatus.PENDING)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            outboxEventRepository.save(outboxEvent);
+        } catch (Exception e) {
+            logger.error("[CorrelationID: {}] Failed to write outbox event for payment.initiated", correlationId, e);
+            throw new RuntimeException("Failed to write outbox event", e);
+        }
 
         return mapToResponse(saved);
     }
@@ -89,6 +110,43 @@ public class TransactionService {
     }
 
     @Transactional
+    public void completeTransaction(UUID transactionId) {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new IllegalArgumentException("Transaction not found with ID: " + transactionId));
+        UUID correlationId = transaction.getCorrelationId();
+
+        logger.info("[CorrelationID: {}] Transitioning transaction {} state from {} to COMPLETED",
+                correlationId, transactionId, transaction.getStatus());
+
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transactionRepository.save(transaction);
+
+        // Create OutboxEvent for payment.completed (instead of direct Kafka publish)
+        try {
+            String payload = objectMapper.writeValueAsString(java.util.Map.of(
+                    "paymentId", transactionId,
+                    "status", "COMPLETED",
+                    "senderAccountId", transaction.getSenderAccountId(),
+                    "receiverAccountId", transaction.getReceiverAccountId(),
+                    "amount", transaction.getAmount(),
+                    "correlationId", correlationId
+            ));
+            OutboxEvent outboxEvent = OutboxEvent.builder()
+                    .aggregateType("Transaction")
+                    .aggregateId(transactionId)
+                    .eventType("payment.completed")
+                    .payload(payload)
+                    .status(OutboxStatus.PENDING)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            outboxEventRepository.save(outboxEvent);
+        } catch (Exception e) {
+            logger.error("[CorrelationID: {}] Failed to write outbox event for payment.completed", correlationId, e);
+            throw new RuntimeException("Failed to write outbox event", e);
+        }
+    }
+
+    @Transactional
     public void compensate(UUID transactionId, String reason) {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new IllegalArgumentException("Transaction not found with ID: " + transactionId));
@@ -101,14 +159,28 @@ public class TransactionService {
         transaction.setStatus(TransactionStatus.FAILED);
         transactionRepository.save(transaction);
 
-        // Publish compensation rollback event
+        // Create OutboxEvent for payment.rollback (instead of direct Kafka publish)
         PaymentRollbackEvent rollbackEvent = PaymentRollbackEvent.builder()
                 .paymentId(transactionId)
                 .accountId(transaction.getSenderAccountId())
                 .amount(transaction.getAmount())
                 .reason(reason)
                 .build();
-        eventProducer.publishPaymentRollback(correlationId, rollbackEvent);
+        try {
+            String payload = objectMapper.writeValueAsString(rollbackEvent);
+            OutboxEvent outboxEvent = OutboxEvent.builder()
+                    .aggregateType("Transaction")
+                    .aggregateId(transactionId)
+                    .eventType("payment.rollback")
+                    .payload(payload)
+                    .status(OutboxStatus.PENDING)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            outboxEventRepository.save(outboxEvent);
+        } catch (Exception e) {
+            logger.error("[CorrelationID: {}] Failed to write outbox event for payment.rollback", correlationId, e);
+            throw new RuntimeException("Failed to write outbox event", e);
+        }
     }
 
     @Transactional(readOnly = true)

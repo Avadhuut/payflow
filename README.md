@@ -126,6 +126,16 @@ If a transaction fails at any stage (e.g., fraud block, insufficient balance, do
   ```
 * The circuit breaker remains open for **10 seconds** before entering a half-open state to check service recovery.
 
+### 10. Transactional Outbox Pattern
+* Resolves the critical **Dual-Write Problem** inside the `transaction-service`.
+* Instead of writing to the database and publishing to Kafka separately, the core transaction entity and an `OutboxEvent` are written atomically inside a single local `@Transactional` database boundary.
+* A background `OutboxScheduler` task polls pending outbox records every 2 seconds, publishes them to Kafka, and marks them as `PROCESSED` only after successful broker acknowledgment (guaranteeing *at-least-once* event delivery).
+
+### 11. Full Enterprise Observability
+* **Metrics**: Integrated **Spring Boot Actuator** and **Micrometer Prometheus** to format and expose application health and performance data at `/actuator/prometheus`.
+* **Distributed Tracing**: Configured **OpenTelemetry** with **Micrometer Tracing** to automatically trace request propagation across microservices.
+* **Visualization**: Deployed **Prometheus** (to scrape metrics), **Jaeger** (to collect/search traces), and **Grafana** (to view dashboards and trace graphs) in our Docker Compose stack.
+
 ---
 
 ## 🛠️ Comprehensive Tech Stack
@@ -141,6 +151,9 @@ If a transaction fails at any stage (e.g., fraud block, insufficient balance, do
 | **Database Storage** | MySQL 8.0 | Separate isolated schema databases for each microservice. |
 | **Inter-Service REST**| Spring Cloud OpenFeign | Synchronous API calls (e.g. user details retrieval). |
 | **Data Access** | Spring Data JPA / Hibernate | Object-Relational Mapping with `@Version` optimistic locking. |
+| **System Metrics** | Spring Actuator & Micrometer | Prometheus registry endpoint enabled at `/actuator/prometheus`. |
+| **Distributed Tracing**| OpenTelemetry & Jaeger | OTLP HTTP trace exporter linked to Jaeger receiver on port `4318`. |
+| **Visual Dashboarding**| Grafana | Dashboard GUI on port `3000` with auto-provisioned datasources. |
 | **Build Engine** | Apache Maven | Multi-module parent POM management. |
 
 ---
@@ -196,5 +209,11 @@ A pre-configured Postman automated test collection is stored at the root: **`Pay
    * **Rahul**: ₹5,000 remaining.
    * **Priya**: ₹7,000 total.
 7. To test **Fraud Detection & Automatic Rollback**:
-   * Attempt to send ₹15,000. It will fail risk scoring ($\ge 60$ points).
-   * Verify via balance checks that the debited money was automatically returned to the sender.
+    * Attempt to send ₹15,000. It will fail risk scoring ($\ge 60$ points).
+    * Verify via balance checks that the debited money was automatically returned to the sender.
+
+### 📊 Verifying Observability & Distributed Tracing
+Once your docker containers and services are running:
+1. **Prometheus Scraping Target Health**: Open [http://localhost:9090/targets](http://localhost:9090/targets) to verify all 8 microservices are registered as `UP` scraping targets.
+2. **Jaeger Tracing Interface**: Open [http://localhost:16686](http://localhost:16686) in your browser. Select `api-gateway` or `transaction-service`, then click *Find Traces* to view visual timeline graphs tracing call propagation.
+3. **Grafana Dashboards**: Access [http://localhost:3000](http://localhost:3000) (anonymous admin mode) and navigate to *Connections* -> *Data sources* to confirm auto-configured connections to Prometheus and Jaeger.

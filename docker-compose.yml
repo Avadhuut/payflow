@@ -76,3 +76,36 @@ services:
       echo 'Topics created successfully:';
       kafka-topics --bootstrap-server kafka:29092 --list;
       "
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: payflow-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: payflow-jaeger
+    ports:
+      - "16686:16686" # Web UI
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "9411:9411"   # Zipkin
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: payflow-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+      - jaeger
