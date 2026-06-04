@@ -73,3 +73,20 @@ resilience4j:
     instances:
       transactionServiceCircuitBreaker:
         baseConfig: default
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: Auth Service
+        url: /api/v1/auth/v3/api-docs
+      - name: Account Service
+        url: /api/v1/accounts/v3/api-docs
+      - name: Transaction Service
+        url: /api/v1/transactions/v3/api-docs
+      - name: Fraud Service
+        url: /api/v1/fraud/v3/api-docs
+      - name: Notification Service
+        url: /api/v1/notifications/v3/api-docs
+      - name: Ledger Service
+        url: /api/v1/ledger/v3/api-docs

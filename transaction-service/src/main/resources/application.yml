@@ -59,3 +59,7 @@ resilience4j:
         maxAttempts: 3
         waitDuration: 1s
 
+springdoc:
+  api-docs:
+    path: /api/transactions/v3/api-docs
+

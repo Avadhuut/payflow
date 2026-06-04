@@ -33,3 +33,7 @@ app:
     secret: 4qdkR1d5NFY1cDh4L0FBQUFCQkNDRERFRkZHR0hISUlKSktLTExNTU5OT1BQUVJTVFVWV1hZWlo=
     expiration: 900 # 15 minutes (in seconds)
     refresh-expiration: 604800 # 7 days (in seconds)
+
+springdoc:
+  api-docs:
+    path: /api/auth/v3/api-docs

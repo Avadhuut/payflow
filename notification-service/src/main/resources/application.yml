@@ -30,3 +30,7 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
+springdoc:
+  api-docs:
+    path: /api/notifications/v3/api-docs
