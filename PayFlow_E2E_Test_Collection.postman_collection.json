@@ -1,0 +1,626 @@
+{
+  "info": {
+    "name": "PayFlow E2E Test Suite",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Register Sender User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"sender@payflow.com\",\n  \"password\": \"password123\",\n  \"role\": \"CUSTOMER\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "register"
+          ]
+        },
+        "description": "Registers a new user who will act as the sender."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Register Receiver User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"receiver@payflow.com\",\n  \"password\": \"password123\",\n  \"role\": \"CUSTOMER\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "register"
+          ]
+        },
+        "description": "Registers a second user who will act as the receiver."
+      },
+      "response": []
+    },
+    {
+      "name": "3. Login Sender (Get JWT Token)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.accessToken) {",
+              "    pm.environment.set(\"accessToken\", jsonData.accessToken);",
+              "    pm.globals.set(\"accessToken\", jsonData.accessToken);",
+              "    console.log(\"Access token saved successfully!\");",
+              "}",
+              "if (jsonData.refreshToken) {",
+              "    pm.environment.set(\"refreshToken\", jsonData.refreshToken);",
+              "    pm.globals.set(\"refreshToken\", jsonData.refreshToken);",
+              "    console.log(\"Refresh token saved successfully!\");",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"sender@payflow.com\",\n  \"password\": \"password123\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        },
+        "description": "Logs in the sender to obtain a valid JWT access token and saves it in Postman variables."
+      },
+      "response": []
+    },
+    {
+      "name": "3a. Refresh JWT Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData.accessToken) {",
+              "    pm.environment.set(\"accessToken\", jsonData.accessToken);",
+              "    pm.globals.set(\"accessToken\", jsonData.accessToken);",
+              "    console.log(\"Access token saved successfully!\");",
+              "}",
+              "if (jsonData.refreshToken) {",
+              "    pm.environment.set(\"refreshToken\", jsonData.refreshToken);",
+              "    pm.globals.set(\"refreshToken\", jsonData.refreshToken);",
+              "    console.log(\"Refresh token saved successfully!\");",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/refresh",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "refresh"
+          ]
+        },
+        "description": "Uses the refresh token to rotate and retrieve new access and refresh tokens."
+      },
+      "response": []
+    },
+    {
+      "name": "3b. User Logout",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/logout",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "logout"
+          ]
+        },
+        "description": "Invalidates the refresh token and logs the user out."
+      },
+      "response": []
+    },
+    {
+      "name": "4. Create Sender Account",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"<REPLACE_WITH_SENDER_USER_ID>\",\n  \"initialBalance\": 15000.00\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/accounts",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "accounts"
+          ]
+        },
+        "description": "Creates a debit account for the sender with a starting balance. Replace userId with the ID returned in step 1."
+      },
+      "response": []
+    },
+    {
+      "name": "5. Create Receiver Account",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"<REPLACE_WITH_RECEIVER_USER_ID>\",\n  \"initialBalance\": 500.00\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/accounts",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "accounts"
+          ]
+        },
+        "description": "Creates an account for the receiver. Replace userId with the ID returned in step 2."
+      },
+      "response": []
+    },
+    {
+      "name": "5a. Deposit Money to Account",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 1000.00\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/accounts/<REPLACE_WITH_ACCOUNT_ID>/deposit",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "accounts",
+            "<REPLACE_WITH_ACCOUNT_ID>",
+            "deposit"
+          ]
+        },
+        "description": "Deposits money into a specific account."
+      },
+      "response": []
+    },
+    {
+      "name": "5b. Check Account Balance",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/accounts/<REPLACE_WITH_ACCOUNT_ID>/balance",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "accounts",
+            "<REPLACE_WITH_ACCOUNT_ID>",
+            "balance"
+          ]
+        },
+        "description": "Checks the balance of a specific account."
+      },
+      "response": []
+    },
+    {
+      "name": "6. Post Payment Transaction",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "tx-key-postman-001"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"senderAccountId\": \"<REPLACE_WITH_SENDER_ACCOUNT_ID>\",\n  \"receiverAccountId\": \"<REPLACE_WITH_RECEIVER_ACCOUNT_ID>\",\n  \"amount\": 250.00\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/transactions",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "transactions"
+          ]
+        },
+        "description": "Initiates a new payment transaction with a specific Idempotency-Key."
+      },
+      "response": []
+    },
+    {
+      "name": "7. Re-Post Same Transaction (Verify Idempotency)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "tx-key-postman-001"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"senderAccountId\": \"<REPLACE_WITH_SENDER_ACCOUNT_ID>\",\n  \"receiverAccountId\": \"<REPLACE_WITH_RECEIVER_ACCOUNT_ID>\",\n  \"amount\": 250.00\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/transactions",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "transactions"
+          ]
+        },
+        "description": "Resends the exact same transaction request to verify that the Redis idempotency guard handles cache hits and skips execution."
+      },
+      "response": []
+    },
+    {
+      "name": "7a. Get Transaction by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/transactions/<REPLACE_WITH_TRANSACTION_ID>",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "transactions",
+            "<REPLACE_WITH_TRANSACTION_ID>"
+          ]
+        },
+        "description": "Retrieves details of a specific transaction by its ID."
+      },
+      "response": []
+    },
+    {
+      "name": "7b. Get Transactions by Account",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/transactions/account/<REPLACE_WITH_ACCOUNT_ID>",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "transactions",
+            "account",
+            "<REPLACE_WITH_ACCOUNT_ID>"
+          ]
+        },
+        "description": "Retrieves all transactions associated with a specific account."
+      },
+      "response": []
+    },
+    {
+      "name": "7c. Get Fraud Check by Transaction",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/fraud/checks/<REPLACE_WITH_TRANSACTION_ID>",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "fraud",
+            "checks",
+            "<REPLACE_WITH_TRANSACTION_ID>"
+          ]
+        },
+        "description": "Retrieves the fraud scoring and evaluation result for a specific transaction."
+      },
+      "response": []
+    },
+    {
+      "name": "7d. Get Fraud Checks by Account",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/fraud/checks/account/<REPLACE_WITH_ACCOUNT_ID>",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "fraud",
+            "checks",
+            "account",
+            "<REPLACE_WITH_ACCOUNT_ID>"
+          ]
+        },
+        "description": "Retrieves all fraud checks associated with a specific account."
+      },
+      "response": []
+    },
+    {
+      "name": "7e. Get Notifications by User",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/notifications/user/<REPLACE_WITH_USER_ID>",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "notifications",
+            "user",
+            "<REPLACE_WITH_USER_ID>"
+          ]
+        },
+        "description": "Retrieves all notification events sent to a specific user."
+      },
+      "response": []
+    },
+    {
+      "name": "8a. Query Ledger Logs by Transaction",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/ledger/transaction/<REPLACE_WITH_TRANSACTION_ID>",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "ledger",
+            "transaction",
+            "<REPLACE_WITH_TRANSACTION_ID>"
+          ]
+        },
+        "description": "Gets the immutable ledger entries for the completed transaction to audit the correlation ID propagation."
+      },
+      "response": []
+    },
+    {
+      "name": "8b. Query Recent Ledger Entries",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/v1/ledger/recent",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "ledger",
+            "recent"
+          ]
+        },
+        "description": "Retrieves the top 100 most recent ledger entries logged in the system."
+      },
+      "response": []
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - RewritePath=/api/v1/auth(?<segment>/?.*), /api/auth$\{segment}
+        - id: account-service
+          uri: lb://account-service
+          predicates:
+            - Path=/api/v1/accounts/**
+          filters:
+            - RewritePath=/api/v1/accounts(?<segment>/?.*), /api/accounts$\{segment}
+        - id: transaction-service
+          uri: lb://transaction-service
+          predicates:
+            - Path=/api/v1/transactions/**
+          filters:
+            - RewritePath=/api/v1/transactions(?<segment>/?.*), /api/transactions$\{segment}
+            - name: CircuitBreaker
+              args:
+                name: transactionServiceCircuitBreaker
+                fallbackUri: forward:/fallback/transaction
+        - id: fraud-service
+          uri: lb://fraud-service
+          predicates:
+            - Path=/api/v1/fraud/**
+          filters:
+            - RewritePath=/api/v1/fraud(?<segment>/?.*), /api/fraud$\{segment}
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/notifications/**
+          filters:
+            - RewritePath=/api/v1/notifications(?<segment>/?.*), /api/notifications$\{segment}
+        - id: ledger-service
+          uri: lb://ledger-service
+          predicates:
+            - Path=/api/v1/ledger/**
+          filters:
+            - RewritePath=/api/v1/ledger(?<segment>/?.*), /api/ledger$\{segment}
+
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000ms
+        permittedNumberOfCallsInHalfOpenState: 3
+    instances:
+      transactionServiceCircuitBreaker:
+        baseConfig: default
