@@ -16,7 +16,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"sender@payflow.com\",\n  \"password\": \"password123\",\n  \"role\": \"CUSTOMER\"\n}"
+          "raw": "{\n  \"email\": \"alice@payflow.com\",\n  \"password\": \"securePassword123\",\n  \"role\": \"CUSTOMER\"\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/v1/auth/register",
@@ -48,7 +48,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"receiver@payflow.com\",\n  \"password\": \"password123\",\n  \"role\": \"CUSTOMER\"\n}"
+          "raw": "{\n  \"email\": \"bob@payflow.com\",\n  \"password\": \"securePassword123\",\n  \"role\": \"CUSTOMER\"\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/v1/auth/register",
@@ -101,7 +101,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"sender@payflow.com\",\n  \"password\": \"password123\"\n}"
+          "raw": "{\n  \"email\": \"alice@payflow.com\",\n  \"password\": \"securePassword123\"\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/v1/auth/login",
@@ -222,7 +222,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"userId\": \"<REPLACE_WITH_SENDER_USER_ID>\",\n  \"initialBalance\": 15000.00\n}"
+          "raw": "{\n  \"userId\": \"<REPLACE_WITH_SENDER_USER_ID>\",\n  \"initialBalance\": 20000.00\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/v1/accounts",
@@ -257,7 +257,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"userId\": \"<REPLACE_WITH_RECEIVER_USER_ID>\",\n  \"initialBalance\": 500.00\n}"
+          "raw": "{\n  \"userId\": \"<REPLACE_WITH_RECEIVER_USER_ID>\",\n  \"initialBalance\": 1000.00\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/v1/accounts",
@@ -292,7 +292,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"amount\": 1000.00\n}"
+          "raw": "{\n  \"amount\": 2000.00\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/v1/accounts/<REPLACE_WITH_ACCOUNT_ID>/deposit",
@@ -353,7 +353,7 @@
           },
           {
             "key": "Idempotency-Key",
-            "value": "tx-key-postman-001"
+            "value": "tx-key-new-001"
           },
           {
             "key": "Content-Type",
@@ -362,7 +362,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"senderAccountId\": \"<REPLACE_WITH_SENDER_ACCOUNT_ID>\",\n  \"receiverAccountId\": \"<REPLACE_WITH_RECEIVER_ACCOUNT_ID>\",\n  \"amount\": 250.00\n}"
+          "raw": "{\n  \"senderAccountId\": \"<REPLACE_WITH_SENDER_ACCOUNT_ID>\",\n  \"receiverAccountId\": \"<REPLACE_WITH_RECEIVER_ACCOUNT_ID>\",\n  \"amount\": 1500.00\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/v1/transactions",
@@ -392,7 +392,7 @@
           },
           {
             "key": "Idempotency-Key",
-            "value": "tx-key-postman-001"
+            "value": "tx-key-new-001"
           },
           {
             "key": "Content-Type",
@@ -401,7 +401,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"senderAccountId\": \"<REPLACE_WITH_SENDER_ACCOUNT_ID>\",\n  \"receiverAccountId\": \"<REPLACE_WITH_RECEIVER_ACCOUNT_ID>\",\n  \"amount\": 250.00\n}"
+          "raw": "{\n  \"senderAccountId\": \"<REPLACE_WITH_SENDER_ACCOUNT_ID>\",\n  \"receiverAccountId\": \"<REPLACE_WITH_RECEIVER_ACCOUNT_ID>\",\n  \"amount\": 1500.00\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/v1/transactions",
